@@ -9,5 +9,5 @@ as secret gists.
 
 Installation
 Clone the Repository:
-git clone <repository_url>
+git clone /
 cd projectTodo
