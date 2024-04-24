@@ -223,7 +223,7 @@ def export_project_summary_to_gist(project_title, pending_todos, completed_todos
         'public': False,
         'description': 'Project Summary'
     }
-    github_access_token = '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'
+    github_access_token = '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'
     
     # Define the headers with the Authorization token
     headers = {
@@ -232,7 +232,7 @@ def export_project_summary_to_gist(project_title, pending_todos, completed_todos
 
     # Create the gist
     response = requests.post('https://api.github.com/gists', data=json.dumps(payload), headers=headers)
-
+    print(response)
     if response.status_code == 201:
         gist_data = response.json()
         gist_url = gist_data['html_url']
