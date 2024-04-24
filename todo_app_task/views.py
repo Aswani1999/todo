@@ -2,6 +2,7 @@ from django.shortcuts import render,HttpResponse,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
+from dotenv import load_dotenv
 # Create your views here.
 
 @login_required(login_url='login')
@@ -223,8 +224,10 @@ def export_project_summary_to_gist(project_title, pending_todos, completed_todos
         'public': False,
         'description': 'Project Summary'
     }
-    github_access_token = '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'
-    
+    load_dotenv()
+
+    github_access_token = os.environ.get('GITHUB_ACCCESS_TOKEN')
+    print(github_access_token)
     # Define the headers with the Authorization token
     headers = {
     'Authorization': f'token {github_access_token}'
@@ -232,7 +235,6 @@ def export_project_summary_to_gist(project_title, pending_todos, completed_todos
 
     # Create the gist
     response = requests.post('https://api.github.com/gists', data=json.dumps(payload), headers=headers)
-    print(response)
     if response.status_code == 201:
         gist_data = response.json()
         gist_url = gist_data['html_url']
