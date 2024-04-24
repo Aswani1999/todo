@@ -9,5 +9,13 @@ as secret gists.
 
 Installation
 Clone the Repository:
-git clone /
+git clone https://github.com/Aswani1999/todo.git   
 cd projectTodo
+
+Install Dependencies:
+Backend-
+Python(Django)
+PostgreSQL
+Frontend-
+javascript,css,ajax
+
