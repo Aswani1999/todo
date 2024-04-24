@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Detail</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'project_detail.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Project Detail</h1>
+        <form method="POST" class="update-form" id="update_title_form">
+            {% csrf_token %}
+            <label for="title" class="form-label">Project Title:</label>
+            <input type="text" id="title" name="title" value="{{ project.title }}" class="form-input" required>
+            <button type="submit" class="btn">Update</button>
+        </form>
+        <h2 class="subtitle">Todos:</h2>
+        <ul class="todos-list" id="todos_list">
+            {% for todo in todos %}
+                <li id="todo_{{ todo.id }}" class="todo-item">
+                    <form id="edit_todo_form_{{ todo.id }}" class="edit-todo-form" style="display: none;">
+                        {% csrf_token %}
+                        <input type="text" id="edit_todo_description_{{ todo.id }}" name="description" class="form-input" required>
+                        <button type="submit" class="btn">Submit</button>
+                    </form>
+                    <span class="todo-description" contenteditable="true" onclick="editTodoDescription({{ todo.id }})" id="todo_description_{{ todo.id }}">{{ todo.description }}</span>
+                    <button onclick=editTodoDescription({{ todo.id }}) class="btn edit-todo-btn">Edit</button>
+                    <span class="todo-date">{{ todo.created_date }}</span>
+                    <span class="todo-status">{{ todo.status }}</span>
+                    {% if todo.status == 'complete' %}
+                        <button onclick="updateTodoStatus({{ todo.id }}, 'pending')" class="btn">Mark as Pending</button>
+                    {% else %}
+                        <button onclick="updateTodoStatus({{ todo.id }}, 'complete')" class="btn">Mark as Complete</button>
+                    {% endif %}
+                    <button onclick="deleteTodo({{ todo.id }})" class="btn">Delete</button>
+                </li>
+            {% endfor %}
+        </ul>
+       
+
+        <form method="POST" class="add-todo-form" id="add_todo_form">
+            {% csrf_token %}
+            <input type="hidden" id="project_id" name="project_id" value="{{ project_id }}">
+            <input type="text" id="todo_description" name="description" placeholder="Description" class="form-input" required>
+            <button type="button" onclick="addTodo()" class="btn">Add Todo</button> <!-- Use type="button" to prevent form submission -->
+        </form>
+        
+        
+
+        
+        
+        <!-- Action to export summary as secret gist -->
+        <button onclick="exportSummary()" class="btn export-btn">Export Summary</button>
+    </div>
+</body>
+
+<script>
+
+function addTodo() {
+    const project_id = document.getElementById('project_id').value;
+    const description = document.getElementById('todo_description').value;
+    const csrftoken = getCookie('csrftoken');
+    const headers = {
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/json' // Specify content type as JSON
+    };
+    const data = {
+        project_id: project_id,
+        description: description
+    };
+
+    axios.post('/add_todo/', JSON.stringify(data), { headers: headers }) // Convert data to JSON string
+        .then(response => {
+           
+            window.location.reload(); 
+        })
+        .catch(error => {
+          
+            console.error('Error adding todo:', error);
+        });
+}
+
+
+function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+}
+
+
+
+
+function updateTodoStatus(todoId, newStatus) {
+    const csrftoken = getCookie('csrftoken'); 
+
+    axios.post(`/update_todo_status/${todoId}/`, { status: newStatus }, {
+        headers: {
+            'X-CSRFToken': csrftoken
+        }
+    })
+    .then(response => {
+        // Handle success
+        window.location.reload(); 
+    })
+    .catch(error => {
+        // Handle error
+        console.error('Error updating todo status:', error);
+    });
+}
+
+function deleteTodo(todoId) {
+    const csrftoken = getCookie('csrftoken');
+
+    axios.post(`/delete_todo/${todoId}/`, {}, {
+        headers: {
+            'X-CSRFToken': csrftoken
+        }
+    })
+    .then(response => {
+       
+        document.getElementById(`todo_${todoId}`).remove(); // Remove todo from the list
+    })
+    .catch(error => {
+       
+        console.error('Error deleting todo:', error);
+    });
+}
+
+
+function exportSummary() {
+    // Get the CSRF token from the cookie
+    const csrftoken = getCookie('csrftoken');
+
+    // Get the GitHub personal access token from the environment
+    const githubAccessToken = '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'; // Replace with your GitHub access token
+
+  
+    axios.post('/export_summary/', {}, {
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Authorization': `token ${githubAccessToken}`
+        }
+    })
+    .then(response => {
+       
+        const gistUrl = response.data.gist_url;
+        if (gistUrl) {
+            alert('Summary exported successfully!\nGist URL: ' + gistUrl);
+        } else {
+            alert('Failed to export summary. Please try again later.');
+        }
+    })
+    .catch(error => {
+       
+        console.error('Error exporting summary:', error);
+        alert('Failed to export summary. Please try again later.');
+    });
+}
+
+// Function to retrieve the CSRF token from cookies
+function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+}
+
+
+// Function to retrieve the CSRF token from cookies
+function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+}
+
+function editTodoDescription(todoId) {
+    const descriptionSpan = document.getElementById(`todo_description_${todoId}`);
+    const editForm = document.getElementById(`edit_todo_form_${todoId}`);
+    const editInput = document.getElementById(`edit_todo_description_${todoId}`);
+
+    descriptionSpan.style.display = 'none';
+    editForm.style.display = 'block';
+    editInput.value = descriptionSpan.innerText.trim(); 
+
+    // Add event listener for form submission
+    editForm.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        const newDescription = editInput.value.trim();
+        const csrftoken = getCookie('csrftoken');
+        const headers = {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json' // Specify content type as JSON
+        };
+        const data = {
+            description: newDescription
+        };
+
+        axios.post(`/update_todo_description/${todoId}/`, JSON.stringify(data), { headers: headers }) 
+            .then(response => {
+                descriptionSpan.innerText = newDescription; 
+                descriptionSpan.style.display = 'inline-block';
+                editForm.style.display = 'none'; 
+            })
+            .catch(error => {
+                console.error('Error updating todo description:', error);
+            });
+    });
+}
+
+function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+}
+
+</script>
+</html>

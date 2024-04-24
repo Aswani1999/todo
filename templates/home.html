@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todos</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header>
+
+<nav>
+<div class="logo">
+    <h4>
+     Todo Project
+</h4>
+</div>
+<div class="menu">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'create_project' %}">Create Project</a>
+    <a href="{% url 'project_list' %}">List Project</a>
+    <a href="{% url 'project_lists' %}">View Project</a>
+  
+</div>
+<div class="register">
+    <a href="{% url 'login' %}">Login</a> 
+    <a href="{% url 'signups' %}">SignUp</a>
+    
+</div>
+
+</nav>
+<section  class="h-text">
+   
+    <h1> Welcome </h1>
+    <br>
+    <a href="#">Explore !</a>
+</section>
+    </header>
+</body>
+</html>
+
