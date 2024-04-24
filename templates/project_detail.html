@@ -136,13 +136,11 @@ function exportSummary() {
     const csrftoken = getCookie('csrftoken');
 
     // Get the GitHub personal access token from the environment
-    const githubAccessToken = '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'; // Replace with your GitHub access token
 
   
     axios.post('/export_summary/', {}, {
         headers: {
             'X-CSRFToken': csrftoken,
-            'Authorization': `token ${githubAccessToken}`
         }
     })
     .then(response => {
